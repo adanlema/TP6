@@ -107,6 +107,32 @@ void test_increment_min_decena(void) {
     TEST_ASSERT_EQUAL_UINT8_ARRAY(ESPERADO, hora, TIME_SIZE);
 }
 
+void test_increment_hora_unidad(void) {
+    static const uint8_t ESPERADO[] = {1, 3, 3, 4, 0, 0};
+    uint8_t              hora[TIME_SIZE];
+
+    SIMULAR_SEGUNDOS(60 * 60, ClockTick(reloj));
+    ClockGetTime(reloj, hora, TIME_SIZE);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(ESPERADO, hora, TIME_SIZE);
+}
+
+void test_increment_hora_decena(void) {
+    static const uint8_t ESPERADO[] = {2, 2, 3, 4, 0, 0};
+    uint8_t              hora[TIME_SIZE];
+
+    SIMULAR_SEGUNDOS(10 * 60 * 60, ClockTick(reloj));
+    ClockGetTime(reloj, hora, TIME_SIZE);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(ESPERADO, hora, TIME_SIZE);
+}
+
+void test_increment_dia(void) {
+    static const uint8_t ESPERADO[] = {1, 2, 3, 4, 0, 0};
+    uint8_t              hora[TIME_SIZE];
+
+    SIMULAR_SEGUNDOS(24 * 60 * 60, ClockTick(reloj));
+    ClockGetTime(reloj, hora, TIME_SIZE);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(ESPERADO, hora, TIME_SIZE);
+}
 /** @ doxygen end group definition */
 /** @ doxygen end group definition */
 /** @ doxygen end group definition */

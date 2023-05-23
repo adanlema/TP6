@@ -4,16 +4,6 @@
 /*==================[macros and definitions]=================================*/
 
 struct clock_s {
-    /*
-    union{
-        uint8_t hora[6];
-        struct{
-            uint8_t hora[2];
-            uint8_t min[2];
-            uint8_t seg[2];
-        }actual;
-    }
-    */
     uint8_t  hora_actual[TIME_SIZE];
     uint32_t ticks;
     uint32_t ticks_por_seg;
@@ -68,6 +58,21 @@ void ClockTick(clock_t reloj) {
     if (reloj->hora_actual[3] == 10) {
         reloj->hora_actual[3] = 0;
         reloj->hora_actual[3 - 1]++;
+    }
+    // INCREMENTAR_HORAS_UNIDAD
+    if (reloj->hora_actual[2] == 6) {
+        reloj->hora_actual[2] = 0;
+        reloj->hora_actual[2 - 1]++;
+    }
+    // INCREMENTAR_HORAS_DECENAS
+    if (reloj->hora_actual[1] == 10) {
+        reloj->hora_actual[1] = 0;
+        reloj->hora_actual[1 - 1]++;
+    }
+    // INCREMENTAR_DIAS
+    if ((reloj->hora_actual[0] == 2) && (reloj->hora_actual[1] == 4)) {
+        reloj->hora_actual[0] = 0;
+        reloj->hora_actual[1] = 0;
     }
 }
 
