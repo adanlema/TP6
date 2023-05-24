@@ -13,12 +13,19 @@
 #define UNIDAD_HOR  1
 #define DECENA_HOR  0
 
-struct clock_s {
-    uint8_t  time[TIME_SIZE];
-    uint32_t ticks;
-    uint32_t ticks_por_seg;
-    bool     valida;
+struct alarma_s {
+    uint8_t time[TIME_SIZE];
+    bool    estado;
 };
+
+struct clock_s {
+    uint8_t   time[TIME_SIZE];
+    uint32_t  ticks;
+    uint32_t  ticks_por_seg;
+    bool      valida;
+    alarma_pt alarma;
+};
+
 /*==================[internal data declaration]==============================*/
 
 /*==================[internal functions declaration]=========================*/
@@ -26,7 +33,8 @@ static void ClockIncrement_seg(clock_t reloj);
 static void ClockIncrement_day(clock_t reloj);
 static void ClockIncrement(clock_t reloj, uint8_t indice, uint8_t valor);
 /*==================[internal data definition]===============================*/
-static struct clock_s self[1];
+static struct clock_s  self[1];
+static struct alarma_s al_reloj[1];
 /*==================[external data definition]===============================*/
 
 /*==================[internal functions definition]==========================*/
@@ -54,7 +62,10 @@ static void ClockIncrement(clock_t reloj, uint8_t indice, uint8_t valor) {
 /*==================[external functions definition]==========================*/
 clock_t ClockCreate(int tics_por_seg) {
     memset(self, 0, sizeof(self));
+    memset(al_reloj, 0, sizeof(al_reloj));
+
     self->ticks_por_seg = tics_por_seg;
+    self->alarma        = al_reloj;
     return self;
 }
 bool ClockGetTime(clock_t reloj, uint8_t * hora, int size) {
@@ -77,6 +88,25 @@ void ClockTick(clock_t reloj) {
     ClockIncrement(reloj, DECENA_MIN, DECENA_TIME); // INCREMENTAR_HORAS_UNIDAD
     ClockIncrement(reloj, UNIDAD_HOR, UNIDAD_TIME); // INCREMENTAR_HORAS_DECENAS
     ClockIncrement_day(reloj);
+}
+
+bool ClockSetAlarma(clock_t reloj, const uint8_t * hora, int size) {
+    memcpy(reloj->alarma->time, hora, size);
+    reloj->alarma->estado = true;
+    return true;
+}
+bool ClockGetAlarma(clock_t reloj, uint8_t * hora, int size) {
+    if (reloj->alarma->estado) {
+        memcpy(hora, reloj->alarma->time, size);
+    }
+    return (reloj->alarma->estado);
+}
+
+bool ClockDispararAlarma(clock_t reloj) {
+    bool estado = false;
+    if (reloj->alarma->time == reloj->time)
+        estado = true;
+    return estado;
 }
 
 /** @ doxygen end group definition */

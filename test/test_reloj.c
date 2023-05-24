@@ -3,15 +3,12 @@ Pruebas
 ‣ Al inicializar el reloj está en 00:00 y con hora invalida.
 ‣ Al ajustar la hora el reloj queda en hora y es válida.
 ‣ Probar horas invalidas y verificar que las rechaza.
-‣ Después de n ciclos de reloj la hora avanza un segundo,
-diez segundos, un minutos, diez minutos, una hora, diez
-horas y un día completo.
+‣ Después de n ciclos de reloj la hora avanza un segundo, diez segundos, un minutos, diez minutos,
+una hora, diez horas y un día completo.
 ‣ Fijar la hora de la alarma y consultarla.
 ‣ Fijar la alarma y avanzar el reloj para que suene.
-‣ Fijar la alarma, deshabilitarla y avanzar el reloj para no
-suene.
-‣ Hacer sonar la alarma y posponerla.
-‣ Hacer sonar la alarma y cancelarla hasta el otro dia..
+‣ Fijar la alarma, deshabilitarla y avanzar el reloj para no suene.
+‣ Hacer sonar la alarma y posponerla. ‣ Hacer sonar la alarma y cancelarla hasta el otro dia..
 
     Test pendientes...
 - Verificar el ingrego de una hora falsa.
@@ -34,8 +31,10 @@ suene.
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
-static clock_t reloj;
+static clock_t   reloj;
+static alarma_pt alarma;
 // static uint8_t hora[6];
+static const uint8_t INICIAL[] = {1, 2, 3, 4, 0, 0};
 /*==================[external data definition]===============================*/
 
 /*==================[internal functions definition]==========================*/
@@ -43,8 +42,8 @@ static clock_t reloj;
 /*==================[external functions definition]==========================*/
 
 void setUp(void) {
-    static const uint8_t INICIAL[] = {1, 2, 3, 4, 0, 0};
-    reloj                          = ClockCreate(TICKS_POR_SEG);
+    // static const uint8_t INICIAL[] = {1, 2, 3, 4, 0, 0};
+    reloj = ClockCreate(TICKS_POR_SEG);
     ClockSetTime(reloj, INICIAL, sizeof(INICIAL));
 }
 
@@ -133,6 +132,42 @@ void test_increment_dia(void) {
     ClockGetTime(reloj, hora, TIME_SIZE);
     TEST_ASSERT_EQUAL_UINT8_ARRAY(ESPERADO, hora, TIME_SIZE);
 }
+
+// Fijar la hora de la alarma y consultarla.
+
+void test_ajustar_alarma(void) {
+    static const uint8_t ESPERADO[]             = {1, 2, 3, 4, 0, 0};
+    uint8_t              hora_alarma[TIME_SIZE] = {0xFF};
+
+    TEST_ASSERT_TRUE(ClockSetAlarma(reloj, ESPERADO, 4));
+    TEST_ASSERT_TRUE(ClockGetAlarma(reloj, hora_alarma, 6));
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(ESPERADO, hora_alarma, 6);
+}
+
+/* Fijar la alarma y avanzar el reloj para que suene. */
+
+void test_activar_alarma(void) {
+    static const uint8_t ESPERADO[] = {1, 3, 3, 4, 0, 0};
+    uint8_t              hora_actual[TIME_SIZE];
+
+    TEST_ASSERT_TRUE(ClockSetAlarma(reloj, ESPERADO, 4));
+    SIMULAR_SEGUNDOS(60 * 60, ClockTick(reloj));
+    ClockGetTime(reloj, hora_actual, 6);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(ESPERADO, hora_actual, 6);
+    TEST_ASSERT_TRUE(ClockDispararAlarma(reloj));
+}
+
+/*
+ALARMA_ACTIVADA
+ACTIVAR
+DESACTIVAR
+POSPONER
+CANCERLAR ALARMA
+
+
+
+WFI_INTERRUPCCION
+*/
 /** @ doxygen end group definition */
 /** @ doxygen end group definition */
 /** @ doxygen end group definition */
