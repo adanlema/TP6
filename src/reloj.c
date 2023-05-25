@@ -103,10 +103,16 @@ bool ClockGetAlarma(clock_t reloj, uint8_t * hora, int size) {
 }
 
 bool ClockDispararAlarma(clock_t reloj) {
-    bool estado = false;
-    if (reloj->alarma->time == reloj->time)
-        estado = true;
-    return estado;
+    bool E = false;
+    if (reloj->alarma->estado) {
+        if (reloj->alarma->time == reloj->time)
+            E = true;
+    }
+    return E;
+}
+bool ClockDesactivarAlarma(clock_t reloj) {
+    reloj->alarma->estado = false;
+    return true;
 }
 
 /** @ doxygen end group definition */

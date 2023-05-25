@@ -20,6 +20,7 @@ bool    ClockSetAlarma(clock_t reloj, const uint8_t * hora, int size);
 bool    ClockGetAlarma(clock_t reloj, uint8_t * hora, int size);
 void    ClockTick(clock_t reloj);
 bool    ClockDispararAlarma(clock_t reloj);
+bool    ClockDesactivarAlarma(clock_t reloj);
 
 /** @ doxygen end group definition */
 /** @ doxygen end group definition */
