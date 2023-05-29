@@ -9,18 +9,18 @@
 /*==================[typedef]================================================*/
 typedef struct clock_s *  clock_t;
 typedef struct alarma_s * alarma_pt;
-// typedef bool (*evento_pt)(clock_t reloj);
+typedef void (*evento_pt)(void);
 /*==================[external data declaration]==============================*/
 
 /*==================[external functions declaration]=========================*/
-clock_t ClockCreate(int tics_por_seg);
+clock_t ClockCreate(int tics_por_seg, evento_pt funcion);
+void    ClockTick(clock_t reloj);
 bool    ClockGetTime(clock_t reloj, uint8_t * hora, int size);
 bool    ClockSetTime(clock_t reloj, const uint8_t * hora, int size);
+
 bool    ClockSetAlarma(clock_t reloj, const uint8_t * hora, int size);
 bool    ClockGetAlarma(clock_t reloj, uint8_t * hora, int size);
 bool    ClockGetAlarmaActivada(clock_t reloj);
-void    ClockTick(clock_t reloj);
-void    ClockDispararAlarma(clock_t reloj);
 bool    ClockDesactivarAlarma(clock_t reloj);
 bool    ClockPosponerAlarma(clock_t reloj);
 void    ClockCancelarAlarma(clock_t reloj);

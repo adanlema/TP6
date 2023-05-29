@@ -18,7 +18,6 @@ struct alarma_s {
     uint8_t time_pos[TIME_SIZE];
     bool    estado;
     bool    postergada;
-    bool    activada;
 };
 
 struct clock_s {
@@ -27,6 +26,7 @@ struct clock_s {
     uint32_t  ticks_por_seg;
     bool      valida;
     alarma_pt alarma;
+    evento_pt funcion;
 };
 
 /*==================[internal data declaration]==============================*/
@@ -63,12 +63,13 @@ static void ClockIncrement(clock_t reloj, uint8_t indice, uint8_t valor) {
 }
 
 /*==================[external functions definition]==========================*/
-clock_t ClockCreate(int tics_por_seg) {
+clock_t ClockCreate(int tics_por_seg, evento_pt funcion) {
     memset(self, 0, sizeof(self));
     memset(al_reloj, 0, sizeof(al_reloj));
 
     self->ticks_por_seg = tics_por_seg;
     self->alarma        = al_reloj;
+    self->funcion       = funcion;
     return self;
 }
 bool ClockGetTime(clock_t reloj, uint8_t * hora, int size) {
@@ -84,6 +85,7 @@ bool ClockSetTime(clock_t reloj, const uint8_t * hora, int size) {
 
 void ClockTick(clock_t reloj) {
     reloj->ticks++;
+
     ClockIncrement_seg(reloj);
     ClockIncrement(reloj, UNIDAD_SEG, UNIDAD_TIME); // INCREMENTAR_DECENAS_SEG
     ClockIncrement(reloj, DECENA_SEG, DECENA_TIME); // INCREMENTAR_MINUTOS_UNIDAD
@@ -91,6 +93,12 @@ void ClockTick(clock_t reloj) {
     ClockIncrement(reloj, DECENA_MIN, DECENA_TIME); // INCREMENTAR_HORAS_UNIDAD
     ClockIncrement(reloj, UNIDAD_HOR, UNIDAD_TIME); // INCREMENTAR_HORAS_DECENAS
     ClockIncrement_day(reloj);
+
+    if (reloj->alarma->estado) {
+        if ((memcmp(reloj->alarma->time, reloj->time, TIME_SIZE)) == 0) {
+            reloj->funcion();
+        }
+    }
 }
 
 bool ClockSetAlarma(clock_t reloj, const uint8_t * hora, int size) {
@@ -106,30 +114,21 @@ bool ClockGetAlarma(clock_t reloj, uint8_t * hora, int size) {
     return (reloj->alarma->estado);
 }
 
-bool ClockGetAlarmaActivada(clock_t reloj) {
-    return reloj->alarma->activada;
-}
-void ClockDispararAlarma(clock_t reloj) {
-    if (reloj->alarma->estado) {
-        if ((memcmp(reloj->alarma->time, reloj->time, TIME_SIZE)) == 0)
-            reloj->alarma->activada = true;
-    } else
-        reloj->alarma->activada = false;
-}
 bool ClockDesactivarAlarma(clock_t reloj) {
-    reloj->alarma->estado   = false;
-    reloj->alarma->activada = false;
+    reloj->alarma->estado = false;
     return true;
 }
 
 bool ClockPosponerAlarma(clock_t reloj) {
     memcpy(reloj->alarma->time_pos, reloj->alarma->time, TIME_SIZE);
-    reloj->alarma->activada = false;
-    reloj->time[UNIDAD_MIN] += 5;
+    reloj->alarma->postergada = true;
+    reloj->time[UNIDAD_MIN] += 1;
+
     return true;
 }
 void ClockCancelarAlarma(clock_t reloj) {
-    reloj->alarma->activada = false;
+
+    
     if (reloj->alarma->postergada)
         memcpy(reloj->alarma->time, reloj->alarma->time_pos, TIME_SIZE);
 }
