@@ -31,7 +31,8 @@ una hora, diez horas y un día completo.
 /*==================[internal data declaration]==============================*/
 
 /*==================[internal functions declaration]=========================*/
-
+void CaptureAlarmEvent(void);
+void CancelarAlarma(void);
 /*==================[internal data definition]===============================*/
 static bool          alarm_event_fired;
 static clock_t       reloj;
@@ -42,6 +43,9 @@ static const uint8_t INICIAL[] = {1, 2, 3, 4, 0, 0};
 /*==================[internal functions definition]==========================*/
 void CaptureAlarmEvent(void) {
     alarm_event_fired = true;
+}
+void CancelarAlarma(void) {
+    alarm_event_fired = false;
 }
 /*==================[external functions definition]==========================*/
 
@@ -169,22 +173,32 @@ void test_cancelar_alarma(void) {
     SIMULAR_SEGUNDOS(60 * 60, ClockTick(reloj));
     TEST_ASSERT_TRUE(alarm_event_fired);
 
-    alarm_event_fired = false;
-    SIMULAR_SEGUNDOS(23 * 60 * 60);
+    SIMULAR_SEGUNDOS(60, ClockTick(reloj));
+    CancelarAlarma();
+    TEST_ASSERT_FALSE(alarm_event_fired);
+    SIMULAR_SEGUNDOS(23 * 60 * 60, ClockTick(reloj));
+    TEST_ASSERT_TRUE(alarm_event_fired);
 }
 
-// void test_posponer_alarma(void) {
-//     static const uint8_t ESPERADO[] = {1, 3, 3, 4, 0, 0};
-//     TEST_ASSERT_TRUE(ClockSetAlarma(reloj, ESPERADO, TIME_SIZE));
-//     SIMULAR_SEGUNDOS(60 * 60, ClockTick(reloj));
+void test_posponer_alarma(void) {
+    static const uint8_t ESPERADO[] = {1, 3, 3, 4, 0, 0};
 
-//     TEST_ASSERT_TRUE(ClockPosponerAlarma(reloj));
-//     alarm_event_fired = false;
-//     SIMULAR_SEGUNDOS(60, ClockTick(reloj));
-//     TEST_ASSERT_TRUE(alarm_event_fired);
-// }
+    TEST_ASSERT_TRUE(ClockSetAlarma(reloj, ESPERADO, TIME_SIZE));
+    SIMULAR_SEGUNDOS(60 * 60, ClockTick(reloj));
+    TEST_ASSERT_TRUE(alarm_event_fired);
 
-//
+    SIMULAR_SEGUNDOS(60, ClockTick(reloj));
+    TEST_ASSERT_TRUE(ClockPosponerAlarma(reloj, 5));
+    CancelarAlarma();
+
+    SIMULAR_SEGUNDOS(6 * 60, ClockTick(reloj));
+    TEST_ASSERT_TRUE(alarm_event_fired);
+    ClockCancelarAlarma(reloj);
+
+    SIMULAR_SEGUNDOS(23 * 55 * 60, ClockTick(reloj));
+    TEST_ASSERT_TRUE(alarm_event_fired);
+    CancelarAlarma();
+}
 
 /*
 WFI_INTERRUPCCION

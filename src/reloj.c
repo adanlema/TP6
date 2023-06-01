@@ -119,16 +119,14 @@ bool ClockDesactivarAlarma(clock_t reloj) {
     return true;
 }
 
-bool ClockPosponerAlarma(clock_t reloj) {
+bool ClockPosponerAlarma(clock_t reloj, uint8_t time_post) {
     memcpy(reloj->alarma->time_pos, reloj->alarma->time, TIME_SIZE);
     reloj->alarma->postergada = true;
-    reloj->time[UNIDAD_MIN] += 1;
+    reloj->time[UNIDAD_MIN] += time_post;
 
     return true;
 }
 void ClockCancelarAlarma(clock_t reloj) {
-
-    
     if (reloj->alarma->postergada)
         memcpy(reloj->alarma->time, reloj->alarma->time_pos, TIME_SIZE);
 }
