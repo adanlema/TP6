@@ -122,13 +122,16 @@ bool ClockDesactivarAlarma(clock_t reloj) {
 bool ClockPosponerAlarma(clock_t reloj, uint8_t time_post) {
     memcpy(reloj->alarma->time_pos, reloj->alarma->time, TIME_SIZE);
     reloj->alarma->postergada = true;
-    reloj->time[UNIDAD_MIN] += time_post;
-
+    reloj->alarma->time[UNIDAD_MIN] += time_post;
+    CONTROLAR_REBALSE(5, 9, reloj->alarma->time[DECENA_MIN], reloj->alarma->time[UNIDAD_MIN],
+                      reloj->alarma->time[UNIDAD_HOR]);
     return true;
 }
 void ClockCancelarAlarma(clock_t reloj) {
-    if (reloj->alarma->postergada)
+    if (reloj->alarma->postergada) {
         memcpy(reloj->alarma->time, reloj->alarma->time_pos, TIME_SIZE);
+        reloj->alarma->postergada = false;
+    }
 }
 
 /** @ doxygen end group definition */

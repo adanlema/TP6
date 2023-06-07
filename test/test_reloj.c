@@ -173,10 +173,11 @@ void test_cancelar_alarma(void) {
     SIMULAR_SEGUNDOS(60 * 60, ClockTick(reloj));
     TEST_ASSERT_TRUE(alarm_event_fired);
 
-    SIMULAR_SEGUNDOS(60, ClockTick(reloj));
+    SIMULAR_SEGUNDOS(1, ClockTick(reloj));
     CancelarAlarma();
     TEST_ASSERT_FALSE(alarm_event_fired);
-    SIMULAR_SEGUNDOS(23 * 60 * 60, ClockTick(reloj));
+
+    SIMULAR_SEGUNDOS(24 * 60 * 60, ClockTick(reloj));
     TEST_ASSERT_TRUE(alarm_event_fired);
 }
 
@@ -187,11 +188,11 @@ void test_posponer_alarma(void) {
     SIMULAR_SEGUNDOS(60 * 60, ClockTick(reloj));
     TEST_ASSERT_TRUE(alarm_event_fired);
 
-    SIMULAR_SEGUNDOS(60, ClockTick(reloj));
-    TEST_ASSERT_TRUE(ClockPosponerAlarma(reloj, 5));
+    SIMULAR_SEGUNDOS(1, ClockTick(reloj));
+    TEST_ASSERT_TRUE(ClockPosponerAlarma(reloj, TIME_POST));
     CancelarAlarma();
 
-    SIMULAR_SEGUNDOS(6 * 60, ClockTick(reloj));
+    SIMULAR_SEGUNDOS(TIME_POST * 60, ClockTick(reloj));
     TEST_ASSERT_TRUE(alarm_event_fired);
     ClockCancelarAlarma(reloj);
 

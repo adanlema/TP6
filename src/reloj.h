@@ -6,6 +6,18 @@
 #include <stdint.h>
 /*==================[macros]=================================================*/
 #define TIME_SIZE 6
+#define TIME_POST 5
+
+#define CONTROLAR_REBALSE(LIMITE_DEC, LIMITE_UNI, DECENA, UNIDAD, SIGUIENTE)                       \
+    if (UNIDAD > LIMITE_UNI) {                                                                     \
+        DECENA = DECENA + UNIDAD / LIMITE_UNI;                                                     \
+        UNIDAD = 0 + ((UNIDAD / LIMITE_UNI) * UNIDAD - (LIMITE_UNI + 1));                          \
+    }                                                                                              \
+    if (DECENA > LIMITE_DEC) {                                                                     \
+        DECENA = DECENA - (LIMITE_DEC + 1);                                                        \
+        SIGUIENTE += 1;                                                                            \
+    }
+
 /*==================[typedef]================================================*/
 typedef struct clock_s *  clock_t;
 typedef struct alarma_s * alarma_pt;
