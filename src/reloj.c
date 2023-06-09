@@ -101,11 +101,10 @@ void ClockTick(clock_t reloj) {
     }
 }
 
-bool ClockSetAlarma(clock_t reloj, const uint8_t * hora, int size) {
+void ClockSetAlarma(clock_t reloj, const uint8_t * hora, int size) {
     memcpy(reloj->alarma->time, hora, size);
     memcpy(reloj->alarma->time_pos, hora, size);
     reloj->alarma->estado = true;
-    return true;
 }
 bool ClockGetAlarma(clock_t reloj, uint8_t * hora, int size) {
     if (reloj->alarma->estado) {
@@ -114,18 +113,20 @@ bool ClockGetAlarma(clock_t reloj, uint8_t * hora, int size) {
     return (reloj->alarma->estado);
 }
 
-bool ClockDesactivarAlarma(clock_t reloj) {
-    reloj->alarma->estado = false;
-    return true;
+bool ClockGetAlarmaHabilitada(clock_t reloj) {
+    return (reloj->alarma->estado);
 }
 
-bool ClockPosponerAlarma(clock_t reloj, uint8_t time_post) {
+void ClockToggleAlarma(clock_t reloj) {
+    reloj->alarma->estado ^= true;
+}
+
+void ClockPosponerAlarma(clock_t reloj, uint8_t time_post) {
     memcpy(reloj->alarma->time_pos, reloj->alarma->time, TIME_SIZE);
     reloj->alarma->postergada = true;
     reloj->alarma->time[UNIDAD_MIN] += time_post;
-    CONTROLAR_REBALSE(5, 9, reloj->alarma->time[DECENA_MIN], reloj->alarma->time[UNIDAD_MIN],
-                      reloj->alarma->time[UNIDAD_HOR]);
-    return true;
+    CONTROLAR_REBALSE_MIN(reloj->alarma->time[DECENA_MIN], reloj->alarma->time[UNIDAD_MIN],
+                          reloj->alarma->time[UNIDAD_HOR]);
 }
 void ClockCancelarAlarma(clock_t reloj) {
     if (reloj->alarma->postergada) {

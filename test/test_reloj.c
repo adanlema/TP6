@@ -41,9 +41,12 @@ static const uint8_t INICIAL[] = {1, 2, 3, 4, 0, 0};
 /*==================[external data definition]===============================*/
 
 /*==================[internal functions definition]==========================*/
+
+//! Funcion para simular que se encendio la alarma.
 void CaptureAlarmEvent(void) {
     alarm_event_fired = true;
 }
+//! Funcion para simular que la alarma dejo de sonar.
 void CancelarAlarma(void) {
     alarm_event_fired = false;
 }
@@ -140,26 +143,33 @@ void test_ajustar_alarma(void) {
     static const uint8_t ESPERADO[]             = {1, 2, 3, 4, 0, 0};
     uint8_t              hora_alarma[TIME_SIZE] = {0xFF};
 
-    TEST_ASSERT_TRUE(ClockSetAlarma(reloj, ESPERADO, 4));
+    ClockSetAlarma(reloj, ESPERADO, 4);
     TEST_ASSERT_TRUE(ClockGetAlarma(reloj, hora_alarma, 6));
     TEST_ASSERT_EQUAL_UINT8_ARRAY(ESPERADO, hora_alarma, 6);
 }
 
 /* Fijar la alarma y avanzar el reloj para que suene. */
 
-void test_activar_alarma(void) {
+void test_alarma_activada(void) {
     static const uint8_t ESPERADO[] = {1, 3, 3, 4, 0, 0};
-    TEST_ASSERT_TRUE(ClockSetAlarma(reloj, ESPERADO, TIME_SIZE));
+    ClockSetAlarma(reloj, ESPERADO, TIME_SIZE);
     SIMULAR_SEGUNDOS(60 * 60, ClockTick(reloj));
     TEST_ASSERT_TRUE(alarm_event_fired);
+}
+
+/* Habilitar la alarma */
+void test_habilitar_alarma(void) {
+    TEST_ASSERT_FALSE(ClockGetAlarmaHabilitada(reloj));
+    ClockToggleAlarma(reloj);
+    TEST_ASSERT_TRUE(ClockGetAlarmaHabilitada(reloj));
 }
 
 /* Fijar la alarma, deshabilitarla y avanzar el reloj para no suene. */
 void test_desactivar_alarma(void) {
     static const uint8_t ESPERADO[] = {1, 3, 3, 4, 0, 0};
-    TEST_ASSERT_TRUE(ClockSetAlarma(reloj, ESPERADO, TIME_SIZE));
-    TEST_ASSERT_TRUE(ClockDesactivarAlarma(reloj));
+    ClockSetAlarma(reloj, ESPERADO, TIME_SIZE);
 
+    ClockToggleAlarma(reloj);
     SIMULAR_SEGUNDOS(60 * 60, ClockTick(reloj));
     TEST_ASSERT_FALSE(alarm_event_fired);
 }
@@ -169,7 +179,7 @@ void test_desactivar_alarma(void) {
 void test_cancelar_alarma(void) {
     static const uint8_t ESPERADO[] = {1, 3, 3, 4, 0, 0};
 
-    TEST_ASSERT_TRUE(ClockSetAlarma(reloj, ESPERADO, TIME_SIZE));
+    ClockSetAlarma(reloj, ESPERADO, TIME_SIZE);
     SIMULAR_SEGUNDOS(60 * 60, ClockTick(reloj));
     TEST_ASSERT_TRUE(alarm_event_fired);
 
@@ -181,15 +191,17 @@ void test_cancelar_alarma(void) {
     TEST_ASSERT_TRUE(alarm_event_fired);
 }
 
+/* Hacer sonar la alarma, posponerla y luego verificar que suene. Verificar que al dia siguiente
+ * suene en la hora programada, no la postergada. */
 void test_posponer_alarma(void) {
     static const uint8_t ESPERADO[] = {1, 3, 3, 4, 0, 0};
 
-    TEST_ASSERT_TRUE(ClockSetAlarma(reloj, ESPERADO, TIME_SIZE));
+    ClockSetAlarma(reloj, ESPERADO, TIME_SIZE);
     SIMULAR_SEGUNDOS(60 * 60, ClockTick(reloj));
     TEST_ASSERT_TRUE(alarm_event_fired);
 
     SIMULAR_SEGUNDOS(1, ClockTick(reloj));
-    TEST_ASSERT_TRUE(ClockPosponerAlarma(reloj, TIME_POST));
+    ClockPosponerAlarma(reloj, TIME_POST);
     CancelarAlarma();
 
     SIMULAR_SEGUNDOS(TIME_POST * 60, ClockTick(reloj));
@@ -202,7 +214,7 @@ void test_posponer_alarma(void) {
 }
 
 /*
-WFI_INTERRUPCCION
+BUSCAR: WFI_INTERRUPCCION
 */
 
 /** @ doxygen end group definition */
